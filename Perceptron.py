@@ -101,16 +101,7 @@ class Perceptron:
         Compare the predicted output with the true target
         Compute the accuracy (the percentage of correct prediction)
     """
-        
-    """
-    Main program (main):
-        Initialize a Perceptron object with the appropriate input_size and learning_rate
-        Prepare the training set:
-            Create binary vectors for the L and I characters
-            Define their corresponding targets (for example L = -1, I = +1)
-            Call the trian method to adjust the weights
-            After training, call the evaluate method to test the perceptron on new data
-    """
+
 
 # Initialize the Perceptron model with 9 input features and a learning rate of 1
 p = Perceptron(input_size=9, learning_rate=1)
