@@ -1,4 +1,5 @@
 import numpy as np
+import util
 # -*- coding: utf-8 -*-
 """
 Created on Sat Oct 12 01:29:33 2024
@@ -48,24 +49,16 @@ class Perceptron:
         """
         x = input_vector    # Alias x for vector
         w = self.weights    # Alias w for weights
-        dot_product = 0     # Initialze dot_product
+        dot_product = np.dot(x, w) # Dot product of vector and weights
         
         print(f"\nPredicting for input vector: {x}")
         print(f"Current weights: {w}")
-        
-        for i in range(len(x)):                 # Loop through indices
-            dot_product += x[i]*w[i]            # Multiply corresponding values
             
         print(f"Dot Product: {dot_product}")    # Display dot product before prediction
 
-        if dot_product >= 0:                    # If DP meets threshold, return 1,
-            print("Prediction: 1 (dot product >= 0)\n")
-            return 1                            # Else return -1
-        else:
-            print("Prediction: -1 (dot product < 0)\n")
-            return -1
-        
-    def train(self, input_vectors, targets, epochs=1):
+        return util.bipolar_activation(dot_product)
+
+    def train(self, input_vectors, targets, epochs=50):
         """
         Trains the perceptron model using the provided input vectors and targets over a number of epochs.
 
@@ -105,7 +98,7 @@ class Perceptron:
 
 
 # Initialize the Perceptron model with 9 input features and a learning rate of 1
-p = Perceptron(input_size=9, learning_rate=1)
+p = Perceptron(input_size=9, learning_rate=0.01)
 
 # Define two 3x3 binary matrices representing the letter L (x1) and the letter I (x2)
 matrix_x1 = [
@@ -119,6 +112,9 @@ matrix_x2 = [
     [0, 1, 0],
     [1, 1, 1]
 ]
+
+# Some I's
+#010010010;111010111;110010111;011010111;111010011;111010110;100100100;001001001;011001011;110100110;100100000;000100100;010010000;000010010;001001000;000001001;
 
 # Define the expected targets for each input vector: -1 for L, 1 for I
 test_targets = [-1, 1]  # -1 for L, 1 for I
