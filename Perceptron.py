@@ -1,3 +1,4 @@
+import numpy as np
 # -*- coding: utf-8 -*-
 """
 Created on Sat Oct 12 01:29:33 2024
@@ -29,8 +30,9 @@ class Perceptron:
         learning_rate : float, optional
             Learning rate for training (default is 1).
         """
-        self.weights = [0] * input_size                 #Initialize weights to 0
-        self.learning_rate = learning_rate              #set learning rate
+        self.weights = np.random.rand(input_size).tolist()    #Initialize weights randomly (0,1)
+        self.weights.append(-1)                               #Add in -1 as bias term
+        self.learning_rate = learning_rate                    #set learning rate
         print("\nInitialized weights:", self.weights)
 
     def predict(self, input_vector):
