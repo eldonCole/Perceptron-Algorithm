@@ -1,3 +1,4 @@
+import random
 import numpy as np
 import util
 # -*- coding: utf-8 -*-
@@ -68,7 +69,7 @@ class Perceptron:
         return util.bipolar_activation(dot_product)
 
 
-    def train(self, input_vectors, targets, epochs=50):
+    def train(self, input_vectors, class_set, epochs=50):
         """
         Trains the perceptron model using the provided input vectors and targets over a number of epochs.
 
@@ -90,7 +91,8 @@ class Perceptron:
         """
         for epoch in range(epochs): #repeat for as many epochs as we choose
             print(f"\nEpoch {epoch + 1}")
-            for x, t in zip(input_vectors,targets): # Loop through the input and targets as tuples, so the model differentiates them
+            for x in input_vectors: # Loop through the input and targets as tuples, so the model differentiates them
+                t = class_set.get(x)  # this is the target for the current tuple (vector)
                 print(f"\nTraining on input vector: {x}, target: {t}")
                 y = self.predict(x) # Predict the output
                 print(f"Prediction: {y}, Target: {t}, Error (t - y): {t - y}")
@@ -111,57 +113,38 @@ class Perceptron:
 # Activation function: Bipolar = -1, Unipolar = 1
 p = Perceptron(input_size=9, learning_rate=0.01, a_function=-1)
 
-# Define two 3x3 binary matrices representing the letter L (x1) and the letter I (x2)
-matrix_x1 = [
-    [1, 0, 0],
-    [1, 0, 0],
-    [1, 1, 1]
-]
-matrix_x2 = [
-    [1, 1, 1],
-    [0, 1, 0],
-    [1, 1, 1]
-]
-
 # Set of <Tuple, Class> where L = 0 (or -1) and I = 1
 class_set = {}
+
 # Some I's
 #110010111;011010111;111010011;111010110;100100100;001001001;011001011;110100110;100100000;000100100;010010000;000010010;001001000;000001001;
-# List of tuples I's
+
+# List of tuple I's
 i_data = [(0, 1, 0, 0, 1, 0, 0, 1, 0, -1), (1, 1, 1, 0, 1, 0, 1, 1, 1, -1)]
-# List of tuple L's
 for i in i_data:
     class_set[i] = 1
 
-# Ensure you match class_set[l] to the activation function you use
+# List of tuple L's
 l_data =[(1,0,0,1,0,0,1,1,1,-1), (1,0,0,1,0,0,1,1,0,-1)]
+
+# Ensure you match class_set[l] to the activation function you use
 for l in l_data:
-    class_set[l] = 0
+    class_set[l] = -1
 
-# Define the expected targets for each input vector: -1 for L, 1 for I
-test_targets = [-1, 1]  # -1 for L, 1 for I
+# Declare input vectors
+input_vectors = []
 
-# Display input matrices for clarity
-print("\nInput Matrix x1:\n")
-for row in matrix_x1:
-    print(row)
+# Add the data in i and l to the input vectors set
+for i in i_data:
+    input_vectors.append(i)
+for l in l_data:
+    input_vectors.append(l)
 
-print("\nInput Matrix x2:\n")
-for row in matrix_x2:
-    print(row)
-
-# Flatten each matrix into a 1D vector as required by the perceptron
-x1 = [item for row in matrix_x1 for item in row]
-x1.append(-1)   # bias
-x2 = [item for row in matrix_x2 for item in row]
-input_vectors = [x1, x2]
-x2.append(-1)   # bias
-
-# Display the flattened vectors for clarity
-print("\nFlattened Vector form:\nx1", x1, "\nx2", x2)
+# Shuffle up the examples of l's and I's in the training set
+random.shuffle(input_vectors)
 
 # Train our perceptron model on the input vectors and targets :)
-p.train(input_vectors, test_targets)
+p.train(input_vectors, class_set)
 
 
 
