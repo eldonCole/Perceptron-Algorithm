@@ -68,8 +68,28 @@ class Perceptron:
 
         return util.bipolar_activation(dot_product)
 
+    '''
+    Inputs:
 
-    def train(self, input_vectors, class_set, epochs=50):
+        List of vectors (or tuples): this is the test set with both L's and I's
+
+        HashSet<tuple, int> : this is the way to identify which class a test point is in.
+
+        Returns: float of percent right, (FUTURE ADD CONFUSION MATRIX)
+    '''
+
+    def evalaute(self, test_set, class_map):
+        correct = 0
+
+        for i in test_set:
+            if self.predict(i) == class_map.get(i):
+                correct += 1
+
+        percent = correct / len(test_set) * 100
+        # Return a confusion matrix, along with percent right
+        return percent
+
+    def train(self, input_vectors, class_set, epochs=100):
         """
         Trains the perceptron model using the provided input vectors and targets over a number of epochs.
 
@@ -120,12 +140,14 @@ class_set = {}
 #110010111;011010111;111010011;111010110;100100100;001001001;011001011;110100110;100100000;000100100;010010000;000010010;001001000;000001001;
 
 # List of tuple I's
-i_data = [(0, 1, 0, 0, 1, 0, 0, 1, 0, -1), (1, 1, 1, 0, 1, 0, 1, 1, 1, -1)]
+i_data2 = [(0, 1, 0, 0, 1, 0, 0, 1, 0, -1), (1, 1, 1, 0, 1, 0, 1, 1, 1, -1), (1,1,0,0,1,0,1,1,1,-1)]
+# List of tuple L's
+l_data2 =[(1,0,0,1,0,0,1,1,1,-1), (1,0,0,1,0,0,1,1,0,-1),(1,0,0,1,1,0,0,0,0,-1)]
+
+i_data = util.convert_txt_to_tuples("dataset_Is.txt")
+l_data = util.convert_txt_to_tuples("dataset_Ls.txt")
 for i in i_data:
     class_set[i] = 1
-
-# List of tuple L's
-l_data =[(1,0,0,1,0,0,1,1,1,-1), (1,0,0,1,0,0,1,1,0,-1)]
 
 # Ensure you match class_set[l] to the activation function you use
 for l in l_data:
@@ -145,6 +167,28 @@ random.shuffle(input_vectors)
 
 # Train our perceptron model on the input vectors and targets :)
 p.train(input_vectors, class_set)
+
+num_right = 0
+num_tests = 4
+print("<================== TESTING =======================>")
+
+#I
+if p.predict((1,1,1,0,1,0,0,1,1,-1)) == 1:
+    num_right += 1
+#L
+if p.predict((1,0,0,1,1,0,0,0,0,-1)) == -1:
+    num_right += 1
+
+#I
+if p.predict((0,0,0,1,0,0,1,0,0,-1)) == 1:
+    num_right += 1
+#L
+if p.predict((0,0,0,1,0,0,1,1,1,-1)) == -1:
+    num_right += 1
+
+print(num_right / num_tests * 100, "% accuracy on", num_tests, "test.")
+
+
 
 
 
