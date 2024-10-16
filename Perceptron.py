@@ -21,7 +21,7 @@ class Perceptron:
     learning_rate : float
         Learning rate for adjusting the weights during training.
     """
-    def __init__(self, input_size, learning_rate=1):    #Input size (number of features in the input), learning rate
+    def __init__(self, input_size, learning_rate=1.0, a_function=1):    #Input size (number of features in the input), learning rate
         """
         Initializes the Perceptron with the given input size and learning rate.
         
@@ -31,8 +31,13 @@ class Perceptron:
         learning_rate : float, optional
             Learning rate for training (default is 1).
         """
-        self.weights = np.random.rand(input_size + 1).tolist()    #Initialize weights randomly (0,1) (include one for bias)
-        self.learning_rate = learning_rate                        #set learning rate
+        self.weights = np.random.rand(input_size + 1).tolist()    # Initialize weights randomly (0,1) (include one for bias)
+        self.learning_rate = learning_rate                        # set learning rate
+        self.a_function = a_function                              # Bipolar = -1, Unipolar = 1
+
+        if a_function != 1 and a_function != -1:
+            raise ValueError("Invalid activation function: Bipolar = -1, Unipolar = 1")
+
         print("\nInitialized weights:", self.weights)
 
     def predict(self, input_vector):
@@ -56,7 +61,12 @@ class Perceptron:
             
         print(f"Dot Product: {dot_product}")    # Display dot product before prediction
 
+        # Activation function: Bipolar = -1, Unipolar = 1
+        if self.a_function == 1:
+            return util.unipolar_activation(dot_product)
+
         return util.bipolar_activation(dot_product)
+
 
     def train(self, input_vectors, targets, epochs=50):
         """
@@ -98,7 +108,8 @@ class Perceptron:
 
 
 # Initialize the Perceptron model with 9 input features and a learning rate of 1
-p = Perceptron(input_size=9, learning_rate=0.01)
+# Activation function: Bipolar = -1, Unipolar = 1
+p = Perceptron(input_size=9, learning_rate=0.01, a_function=-1)
 
 # Define two 3x3 binary matrices representing the letter L (x1) and the letter I (x2)
 matrix_x1 = [
@@ -106,15 +117,26 @@ matrix_x1 = [
     [1, 0, 0],
     [1, 1, 1]
 ]
-
 matrix_x2 = [
     [1, 1, 1],
     [0, 1, 0],
     [1, 1, 1]
 ]
 
+# Set of <Tuple, Class> where L = 0 (or -1) and I = 1
+class_set = {}
 # Some I's
-#010010010;111010111;110010111;011010111;111010011;111010110;100100100;001001001;011001011;110100110;100100000;000100100;010010000;000010010;001001000;000001001;
+#110010111;011010111;111010011;111010110;100100100;001001001;011001011;110100110;100100000;000100100;010010000;000010010;001001000;000001001;
+# List of tuples I's
+i_data = [(0, 1, 0, 0, 1, 0, 0, 1, 0, -1), (1, 1, 1, 0, 1, 0, 1, 1, 1, -1)]
+# List of tuple L's
+for i in i_data:
+    class_set[i] = 1
+
+# Ensure you match class_set[l] to the activation function you use
+l_data =[(1,0,0,1,0,0,1,1,1,-1), (1,0,0,1,0,0,1,1,0,-1)]
+for l in l_data:
+    class_set[l] = 0
 
 # Define the expected targets for each input vector: -1 for L, 1 for I
 test_targets = [-1, 1]  # -1 for L, 1 for I
