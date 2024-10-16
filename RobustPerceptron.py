@@ -30,7 +30,7 @@ class Perceptron:
             print("Prediction: -1 (dot product < 0)\n")         # else, return -1
             return -1
         
-    def train(self, input_vectors, targets, epochs=30):
+    def train(self, input_vectors, targets, epochs=50):
         for epoch in range(epochs):                                             # repeat for as many epochs as we choose
             print(f"\nEpoch {epoch + 1}")                                       # display epoch iteration to user
             for x, t in zip(input_vectors,targets):                             # Loop through the input and targets as tuples, so the model differentiates them
@@ -110,7 +110,7 @@ print("\nFlattened Vector form:\nx1", x1, "\nx2", x2)   # Display the flattened 
   
 #5x5 Model implementation----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
+"""
 L_positions = []            # Now that our model is trained with 100% accuracy, lets test what it does with a 5x5 matrix.
 L_shape = np.array([        # We will organize the same L shape from the 3x3 matrix in every possible location within the 5x5
     [1, 0, 0],              # There are 9 Possible ways to organize our L shape
@@ -158,13 +158,71 @@ LI_Positions = L_positions + I_positions                        # create a list 
 p3 = Perceptron(25,1)                                           # instantiate new perceptron with size 25 (5x5)
 p3.train(LI_Positions,LI_Targets)                               # pass training parameters
 p3.evaluate(LI_Positions,LI_Targets)                            # validate the model after it has been trained
+"""            
+
+# 3x3 Generalization testing for additional versions--------------------------------------------------------------------------------------------------------------------------------
             
-            
+# now, lets see if our model can maintain its accuracy for alternative forms of our characters (e.g, lowercase I, and shorter L character)
+# in other words, will our dataset remain linearly separable? Let's begin with training the model to distinguish the new versions of the characters on a 3x3
 
+lowercase_i = np.array([ 
+    [0, 1, 0], 
+    [0, 1, 0],
+    [0, 1, 0]
+]) 
+lowercase_i2 = np.array([ 
+    [1, 0, 0], 
+    [1, 0, 0],
+    [1, 0, 0]
+]) 
+lowercase_i3 = np.array([ 
+    [0, 0, 1], 
+    [0, 0, 1],
+    [0, 0, 1]
+]) 
 
+lowercase_l = np.array([ 
+    [1, 0, 0], 
+    [1, 0, 0],
+    [1, 1, 0]
+]) 
+lowercase_l2 = np.array([ 
+    [1, 0, 0], 
+    [1, 0, 0],
+    [1, 1, 0]
+]) 
+flattened_i = lowercase_i.flatten().tolist()
+flattened_i2 = lowercase_i2.flatten().tolist()
+flattened_i3 = lowercase_i3.flatten().tolist()
+lowercase_is = [flattened_i, flattened_i2, flattened_i3]
 
+uppercase_L = np.array([                              
+    [1, 0, 0],
+    [1, 0, 0],
+    [1, 1, 1]
+])
+uppercase_I = np.array([                             
+    [1, 1, 1],
+    [0, 1, 0],
+    [1, 1, 1]
+])
 
+flattened_l = lowercase_l.flatten().tolist()
+flattened_l2 = lowercase_l2.flatten().tolist()
+lowercase_ls = [flattened_l, flattened_l2]
 
+all_Ls = lowercase_ls + [uppercase_L.flatten().tolist()]
+all_Is = lowercase_is + [uppercase_I.flatten().tolist()]
+all_vectors = all_Ls + all_Is
+
+all_targets = [-1] * len(all_Ls) + [1] * len(all_Is)
+
+#now, we test the perceptron: 
+p = Perceptron(input_size=9, learning_rate=1)
+p.train(all_vectors, all_targets)
+p.evaluate(all_vectors, all_targets)
+
+# holy shit it worked. now we will test the generalization of these character shapes across a 5x5 matrix----------------------------------------------------------------------------
 
 
 
