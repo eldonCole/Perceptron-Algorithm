@@ -32,14 +32,14 @@ class Perceptron:
         learning_rate : float, optional
             Learning rate for training (default is 1).
         """
-        self.weights = np.random.rand(input_size + 1).tolist()    # Initialize weights randomly (0,1) (include one for bias)
+        self.weights = np.random.rand(input_size).tolist()    # Initialize weights randomly (0,1) (include one for bias)
         self.learning_rate = learning_rate                        # set learning rate
         self.a_function = a_function                              # Bipolar = -1, Unipolar = 1
 
         if a_function != 1 and a_function != -1:
             raise ValueError("Invalid activation function: Bipolar = -1, Unipolar = 1")
 
-        print("\nInitialized weights:", self.weights)
+        #print("\nInitialized weights:", self.weights)
 
     def predict(self, input_vector):
         """
@@ -57,10 +57,10 @@ class Perceptron:
         w = self.weights    # Alias w for weights
         dot_product = np.dot(x, w) # Dot product of vector and weights
         
-        print(f"\nPredicting for input vector: {x}")
-        print(f"Current weights: {w}")
+        #print(f"\nPredicting for input vector: {x}")
+        #print(f"Current weights: {w}")
             
-        print(f"Dot Product: {dot_product}")    # Display dot product before prediction
+        #print(f"Dot Product: {dot_product}")    # Display dot product before prediction
 
         # Activation function: Bipolar = -1, Unipolar = 1
         if self.a_function == 1:
@@ -78,7 +78,7 @@ class Perceptron:
         Returns: float of percent right, (FUTURE ADD CONFUSION MATRIX)
     '''
 
-    def evalaute(self, test_set, class_map):
+    def evaluate(self, test_set, class_map):
         correct = 0
 
         for i in test_set:
@@ -89,7 +89,7 @@ class Perceptron:
         # Return a confusion matrix, along with percent right
         return percent
 
-    def train(self, input_vectors, class_set, epochs=100):
+    def train(self, input_vectors, class_set, epochs=30):
         """
         Trains the perceptron model using the provided input vectors and targets over a number of epochs.
 
@@ -110,15 +110,15 @@ class Perceptron:
             - Weights are adjusted iteratively to minimize prediction error over time.
         """
         for epoch in range(epochs): #repeat for as many epochs as we choose
-            print(f"\nEpoch {epoch + 1}")
+            #print(f"\nEpoch {epoch + 1}")
             for x in input_vectors: # Loop through the input and targets as tuples, so the model differentiates them
                 t = class_set.get(x)  # this is the target for the current tuple (vector)
-                print(f"\nTraining on input vector: {x}, target: {t}")
+                #print(f"\nTraining on input vector: {x}, target: {t}")
                 y = self.predict(x) # Predict the output
-                print(f"Prediction: {y}, Target: {t}, Error (t - y): {t - y}")
+                #print(f"Prediction: {y}, Target: {t}, Error (t - y): {t - y}")
                 for i in range(len(self.weights)): # Loop through each of the weights indices
                     self.weights[i] += self.learning_rate * (t-y) * x[i]    # Apply the perceptron learning rule ;)
-                print(f"Updated weights: {self.weights}")
+                #print(f"Updated weights: {self.weights}")
 
     """
     Evaluation method (evaluate):
@@ -128,74 +128,122 @@ class Perceptron:
         Compute the accuracy (the percentage of correct prediction)
     """
 
+if __name__ == "__main__":
+    # Initialize the Perceptron model with 9 input features and a learning rate of 1
+    # Activation function: Bipolar = -1, Unipolar = 1
 
-# Initialize the Perceptron model with 9 input features and a learning rate of 1
-# Activation function: Bipolar = -1, Unipolar = 1
-p = Perceptron(input_size=9, learning_rate=0.01, a_function=-1)
+    # Set of <Tuple, Class> where L = 0 (or -1) and I = 1
+    class_set = {}
 
-# Set of <Tuple, Class> where L = 0 (or -1) and I = 1
-class_set = {}
+    i_data = util.convert_txt_to_tuples("dataset_Is.txt")
+    l_data = util.convert_txt_to_tuples("dataset_Ls.txt")
 
-# Some I's
-#110010111;011010111;111010011;111010110;100100100;001001001;011001011;110100110;100100000;000100100;010010000;000010010;001001000;000001001;
+    for i in i_data:
+        class_set[i] = 1
 
-# List of tuple I's
-i_data2 = [(0, 1, 0, 0, 1, 0, 0, 1, 0, -1), (1, 1, 1, 0, 1, 0, 1, 1, 1, -1), (1,1,0,0,1,0,1,1,1,-1)]
-# List of tuple L's
-l_data2 =[(1,0,0,1,0,0,1,1,1,-1), (1,0,0,1,0,0,1,1,0,-1),(1,0,0,1,1,0,0,0,0,-1)]
+    # Ensure you match class_set[l] to the activation function you use
+    for l in l_data:
+        class_set[l] = -1
 
-i_data = util.convert_txt_to_tuples("dataset_Is.txt")
-l_data = util.convert_txt_to_tuples("dataset_Ls.txt")
-for i in i_data:
-    class_set[i] = 1
+    noisey_i = util.convert_txt_to_tuples("noisey_Is.txt")
+    noisey_l = util.convert_txt_to_tuples("noisey_Ls.txt")
 
-# Ensure you match class_set[l] to the activation function you use
-for l in l_data:
-    class_set[l] = -1
+    for i in noisey_i:
+        class_set[i] = 1
 
-# Declare input vectors
-input_vectors = []
+    for j in noisey_l:
+        class_set[j] = -1
 
-# Add the data in i and l to the input vectors set
-for i in i_data:
-    input_vectors.append(i)
-for l in l_data:
-    input_vectors.append(l)
+    all_data = i_data + l_data + noisey_l + noisey_i
+    # Ensure we dont have duplicates
+    all_data = list(set(all_data))
 
-# Shuffle up the examples of l's and I's in the training set
-random.shuffle(input_vectors)
+    l5 = util.convert_txt_to_tuples("data5l.txt")
+    i5 = util.convert_txt_to_tuples("data5i.txt")
 
-# Train our perceptron model on the input vectors and targets :)
-p.train(input_vectors, class_set)
+    for i in i5:
+        class_set[i] = 1
 
-num_right = 0
-num_tests = 4
-print("<================== TESTING =======================>")
+    for j in l5:
+        class_set[j] = -1
 
-#I
-if p.predict((1,1,1,0,1,0,0,1,1,-1)) == 1:
-    num_right += 1
-#L
-if p.predict((1,0,0,1,1,0,0,0,0,-1)) == -1:
-    num_right += 1
+    all_data = i5 + l5
+    print(len(all_data))
 
-#I
-if p.predict((0,0,0,1,0,0,1,0,0,-1)) == 1:
-    num_right += 1
-#L
-if p.predict((0,0,0,1,0,0,1,1,1,-1)) == -1:
-    num_right += 1
+    # shuffle them, but with same seed each time
+    random.seed(9)
+    random.shuffle(all_data)
+    print(len(all_data), "total data-points")
+    """
+    max1 = 0
 
-print(num_right / num_tests * 100, "% accuracy on", num_tests, "test.")
+    for i in range(11, 300):
+        p = Perceptron(input_size=26, learning_rate=1, a_function=-1)
+        p.train(all_data, class_set, i)
+        x = p.evaluate(all_data, class_set)
+        if x == 100:
+            print("IT CONVERGED")
+            break
 
+        if x > max1:
+            max1 = x
 
+    print("Max is", max1)
+    """
 
+    def partition_k_fold(dataset, k):
+        length = len(dataset)
+        f_size = length // k
+        remainder = length % k
 
+        folds = []
+        start = 0
 
+        for i in range(k):
+            # If there is a remainder, distribute an extra element to some folds
+            end = start + f_size + (1 if i < remainder else 0)
+            folds.append(dataset[start:end])
+            start = end
 
+        return folds
 
+    def cross_validation_k_fold(dataset, k, class_set, learning_rate=0.05, a_function=-1, epochs=50):
+        folds = partition_k_fold(dataset, k)
+        accuracies = []
 
+        for i in range(k):
+            # Use the all except 1 for training
+            train_folds = [folds[j] for j in range(k) if j != i]
+            test_fold = folds[i]
 
+            train_vectors = []
+            # Add each training tuple to the training list
+            for fold in train_folds:
+                train_vectors.extend(fold)
 
+            # Create a new perceptron instance for each fold to ensure weights are reset
+            p = Perceptron(input_size=len(train_vectors[0]), learning_rate=learning_rate, a_function=a_function)
 
+            # Train the perceptron on the training set
+            p.train(train_vectors, class_set, epochs=epochs)
 
+            # Evaluate on the test fold
+            accuracy = p.evaluate(test_fold, class_set)
+            accuracies.append(accuracy)
+
+            print(f"Accuracy for fold {i + 1}: {accuracy:.2f}%")
+
+        # Compute and return the average accuracy
+        avg_accuracy = np.mean(accuracies)
+        #print(accuracies)
+        print(f"\nAverage accuracy across {k} folds: {avg_accuracy:.2f}%")
+        print("Min accuracy", min(accuracies))
+        print("Max accuracy", max(accuracies))
+        return avg_accuracy
+
+    res = 0
+    for i in range(30):
+        res += cross_validation_k_fold(all_data, 12, class_set, .1, -1, 11)
+
+    # see what the average of averages is
+    print(res / 30)
