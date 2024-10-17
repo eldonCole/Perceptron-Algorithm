@@ -101,10 +101,10 @@ class DrawingApp:
 
 if __name__ == "__main__":
     # CHANGE THIS TO CHANGE BETWEEN 3x3 OR 5x5
-    n = 3
+    n = 5
 
     # CHANGE THIS TO CHANGE THE FILE YOU WRITE TO
-    file_name = "dataset_Ls.txt"
+    file_name = "data5l.txt"
 
     # CLICK ON SQUARES, ONCE FILLED IN THE CORRECT ONES, CLICK SAVE AND IT WILL
     # APPEND IT TO THE FILE YOU HAVE ABOVE, IT WILL ALSO CHECK FOR DUPLICATE VALUES
