@@ -221,7 +221,7 @@ if __name__ == "__main__":
             for fold in train_folds:
                 train_vectors.extend(fold)
 
-            # Create a new perceptron instance for each fold to ensure weights are reset
+            # make a new perceptron, ensures we reset the weights
             p = Perceptron(input_size=len(train_vectors[0]), learning_rate=learning_rate, a_function=a_function)
 
             # Train the perceptron on the training set
