@@ -30,7 +30,7 @@ class Perceptron:
             print("Prediction: -1 (dot product < 0)\n")         # else, return -1
             return -1
         
-    def train(self, input_vectors, targets, epochs=50):
+    def train(self, input_vectors, targets, epochs=100):
         for epoch in range(epochs):                                             # repeat for as many epochs as we choose
             print(f"\nEpoch {epoch + 1}")                                       # display epoch iteration to user
             for x, t in zip(input_vectors,targets):                             # Loop through the input and targets as tuples, so the model differentiates them
@@ -72,157 +72,94 @@ class Perceptron:
         
 """
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    In the following, we procedurally demonstrate the capability of this Perceptron class.
+    In the following, we demonstrate the capability of this Perceptron class.
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 """
-
-"""
-p = Perceptron(input_size=9, learning_rate=1)   # We begin by initializing the Perceptron model with 9 inputs (for a 3x3) and a learning rate of 1
-matrix_x1 = [                                   #matrix_x1 represents L shape
-    [1, 0, 0],
-    [1, 0, 0],
-    [1, 1, 1]
-]
-matrix_x2 = [                                   #matrix_x2 represents I shape
-    [1, 1, 1],
-    [0, 1, 0],
-    [1, 1, 1]
-]
-
-test_targets = [-1, 1]                  # Define the expected targets for each input vector: -1 for L, 1 for I
-                                        # -1 for L, 1 for I
-print("\nTraining Input Matrix x1:\n")  # Display input matrices for clarity
-for row in matrix_x1:                   # loop through rows
-    print(row)
-
-print("\nTraining Input Matrix x2:\n")
-for row in matrix_x2:
-    print(row)
+def choose_grid_size(): # This method prompts the user to choose between grid sizes, and how much variation of each character they would like to train and test the model on
+    while True:                                                         # begin infinite loop until user inputs 3 or 5
+        try:
+            grid_size = int(input("Choose grid size (3 or 5): "))       # firstly, we prompt the user for either a 3x3, or a 5x5 matrix
+            if grid_size in [3, 5]:                                     # if the input is a valid option, break from loop
+                break
+            else:
+                print("Invalid choice. Please choose either 3 or 5.")   # prompt user to input valid DATA TYPE
+        except ValueError:                                              # catch block to prompt for valid VALUE
+            print("Invalid input. Please enter a number (3 or 5).")
     
-x1 = [item for row in matrix_x1 for item in row]        # Flatten each matrix into a 1D vector as required by the perceptron
-x2 = [item for row in matrix_x2 for item in row]
-input_vectors = [x1, x2]                                # initialize vector inputs (list of lists)
-print("\nFlattened Vector form:\nx1", x1, "\nx2", x2)   # Display the flattened vectors for clarity
+    while True:                                                         # begin another loop until user inputs 1 or 2 for variations of characters
+        try:
+            version_choice = int(input("Would you like 1 version of each shape or 2 versions of each shape? (Enter 1 or 2): "))
+            if version_choice in [1, 2]:                                # prompt the user, and break from loop onces 1 or 2 is entered
+                break
+            else:
+                print("Invalid choice. Please choose either 1 or 2.")   # prompt user to input valid DATA TYPE
+        except ValueError:                                              # catch block to prompt for valid VALUE
+            print("Invalid input. Please enter a number (1 or 2).")
+    
+    return grid_size, version_choice                                    # return both user inputs (3 or 5, and 1 or 2)
+# this method was the hardest part of the entire project.
+def place_shape_in_grid(shape, grid_size):                              # This method places our defined variations of each character    
+    rows, cols = shape.shape                                            # across the matrices. first, we invoke the .shape attribute of NumPys arrays that returns a tuple (3,3) or (5,5)
+    positions = []                                                      # initialize an empty list for the various positions          
+    for row in range(grid_size - rows + 1):                             # here we loop through the vertical positions of the grid, without exceeding the bounds
+        for col in range(grid_size - cols + 1):                         # here, we loop through the horizontal posiotions of the grid, similarly
+            grid = np.zeros((grid_size, grid_size), dtype=int)          # then we create an array of 0's with the size of the users choice, and declare int as data type
+            grid[row:row + rows, col:col + cols] = shape                # specify the vertical slice beginning from row and going up to row+rows (exclusive). then do the same for columns
+            positions.append(grid.flatten().tolist())                   # each time a grid is created, we flatten it to a list, and append it to our postions lists (list of lists)
+    return positions                                                    # then return list of all positions
 
-#p.train(input_vectors, test_targets)                    # Train our perceptron model on the input vectors and targets :)
-#p.evaluate(input_vectors, test_targets)                 #evaluate whether the model is properly distinguishing the two
+def main():                                            # main method, called to prompt user and initialize the perceptron operation
+    grid_size, version_choice = choose_grid_size()     # call the choose grid size method to prompt the user
+
+    L_shape = np.array([        # firstly, we must define our shapes (graphical representations of letters))
+        [1, 0, 0],
+        [1, 0, 0],              # here, we have a capital L, with bottom row size 3
+        [1, 1, 1]
+    ])
+    alternate_L = np.array([    # here, we have an alternative L shape, with bottom row size 2 (cant really do lowercase because then it would be the same as our alternate i shape)
+        [1, 0, 0],
+        [1, 0, 0],
+        [1, 1, 0]
+    ])
+    I_shape = np.array([        # then we have our capital I shape
+        [1, 1, 1],
+        [0, 1, 0],
+        [1, 1, 1]
+    ])
+    alternate_I = np.array([    # finally we have our alternate i shape.
+        [0, 1, 0],
+        [0, 1, 0],
+        [0, 1, 0]
+    ])
+
+    L_positions = []    #initialize a list for all L positions
+    I_positions = []    #initialize a list ofr all I positions
+
+    if version_choice == 1:                                                 # if our user chose a single version of each character
+        L_positions.extend(place_shape_in_grid(L_shape, grid_size))         # we invoke the place shape in grid method, and add the lists that it returns to the end of the positions lists
+        I_positions.extend(place_shape_in_grid(I_shape, grid_size))         # then we do the same for our I shape
+    elif version_choice == 2:                                               # else if the user chooses two versions of each shape
+        L_positions.extend(place_shape_in_grid(L_shape, grid_size))         # we do the exace same except now we pass the place shape in grid method two versions of each shape
+        L_positions.extend(place_shape_in_grid(alternate_L, grid_size))     # here, we pass alternate L
+        I_positions.extend(place_shape_in_grid(I_shape, grid_size))
+        I_positions.extend(place_shape_in_grid(alternate_I, grid_size))     # and here, we pass alternate I.
+
+    all_vectors = L_positions + I_positions                                 # now that we have our populated lists of all positions, we place them into a single list of input vectors :)
+    all_targets = [-1] * len(L_positions) + [1] * len(I_positions)          # then we populate a list of targets that MUST correlate with the list of input vectors, so we multiply by the
+                                                                            # length of each lists (-1 for L's, 1 for I's)
+                                                                            
+    perceptron = Perceptron(input_size=grid_size * grid_size, learning_rate=1) # finally, we may initilize our perceptron, by specifying the input size, and learning rate
+    perceptron.train(all_vectors, all_targets)                                 # next, we train the model with our extensive list of input vectors, and corresponding targets 
+    perceptron.evaluate(all_vectors, all_targets)                              # last, but not least, we evaluate the intelligence of our model with the same inputs 
+
+# invoke main function
+if __name__ == "__main__":      # when a .py file is run, it has a built in __name__ variable, the default of which, is named "__main__". so this statemetn will always be true (unless we use
+    main()                      # a module ran indirectly in another script). and thus, the main function is ran.
+    
 """
-  
-#5x5 Model implementation----------------------------------------------------------------------------------------------------------------------------------------------------------
-
+    In this perceptron class, we find that it is very efficient in differentiation between our L shape, and I shape within a 3x3--even for our alternative shapes.
+    However, when the model is tained on a 5x5 matrix, with TWO VERSIONS of each character, and the maximum number of positions for each character,
+    it is unable to differentiate between our L's and I's.
+    This tells us that--at least for these sets of alternate versions of characters--the data set of various positions and characters is unfortunately LINEARLY INSEPARABLE.
+    This is at least the case for this given dataset, which is created by loop functions that generate all possible postions.
 """
-L_positions = []            # Now that our model is trained with 100% accuracy, lets test what it does with a 5x5 matrix.
-L_shape = np.array([        # We will organize the same L shape from the 3x3 matrix in every possible location within the 5x5
-    [1, 0, 0],              # There are 9 Possible ways to organize our L shape
-    [1, 0, 0],
-    [1, 1, 1]
-])
-
-for row in range(3):                                # We loop through all valid starting positions (row,col) in teh 5x5 grid. We can place the L in rows 0, 1, or 2 
-    for col in range(3):                            # Then, we can place the L in columns o 1, or 2
-        grid = np.zeros((5,5), dtype=int)           # Now, create a new 5x5 matrix of zeros
-        grid[row:row+3, col:col+3] = L_shape        # Given that we are looping within range 3, "row:row+3" means rows 0, 1, or 2 ;)
-        flattened_grid = grid.flatten().tolist()    #flatten our matrix to a vector (as list)
-        L_positions.append(flattened_grid)          #append this grid to the list of possible L placements
-
-L_targets = [-1] * len(L_positions)                 # We have now generated ever possilbe L shape position within a 5x5 matrix.
-#p2 = Perceptron(input_size=25, learning_rate=1)    # Let's see how our model behaves when we train it with these inputs.
-#p2.train(L_positions, L_targets)                   # This does also mean that we will have to alter our input size by initizlizing another perceptron
-#p2.evaluate(L_positions, L_targets)                # Additoinally, we will have to extend the number of targets to match the number of L shape placements
-                                                    # all targets should be -1 because it's all 'L'
-                                                    
-                                                    
-I_positions = []            # Now that our 3x3 model is trained with 100% accuracy, lets test what it does with a 5x5 matrix.
-I_shape = np.array([        # We will organize the same L shape from the 3x3 matrix in every possible location within the 5x5
-    [1, 1, 1],              # There are 9 Possible ways to organize our L shape
-    [0, 1, 0],
-    [1, 1, 1]
-])                                                    
-for row in range(3):                                # We loop through all valid starting positions (row,col) in teh 5x5 grid. We can place the I in rows 0, 1, or 2 
-   for col in range(3):                             # Then, we can place the I in columns o 1, or 2
-        grid = np.zeros((5,5), dtype=int)           # Now, create a new 5x5 matrix of zeros
-        grid[row:row+3, col:col+3] = I_shape        # Given that we are looping within range 3, "row:row+3" means rows 0, 1, or 2 ;)
-        flattened_grid = grid.flatten().tolist()    # flatten our matrix to a vector (as list)
-        I_positions.append(flattened_grid)          # append this grid to the list of possible I placements
-
-I_targets = [1] * len(I_positions)                  # We have now generated ever possilbe I shape position within a 5x5 matrix.
-#p2.train(I_positions, I_targets)                   # This does also mean that we will have to alter our input size by initizlizing another perceptron
-#p2.evaluate(I_positions, I_targets)
-
-
-
-
-LI_Targets = [-1] * len(L_positions) + [1] * len(I_positions)   # create array of targets for each possible position (necessary)
-LI_Positions = L_positions + I_positions                        # create a list of all possible positions (list of vectors)
-
-p3 = Perceptron(25,1)                                           # instantiate new perceptron with size 25 (5x5)
-p3.train(LI_Positions,LI_Targets)                               # pass training parameters
-p3.evaluate(LI_Positions,LI_Targets)                            # validate the model after it has been trained
-"""            
-
-# 3x3 Generalization testing for additional versions--------------------------------------------------------------------------------------------------------------------------------
-            
-# now, lets see if our model can maintain its accuracy for alternative forms of our characters (e.g, lowercase I, and shorter L character)
-# in other words, will our dataset remain linearly separable? Let's begin with training the model to distinguish the new versions of the characters on a 3x3
-
-lowercase_i = np.array([ 
-    [0, 1, 0], 
-    [0, 1, 0],
-    [0, 1, 0]
-]) 
-lowercase_i2 = np.array([ 
-    [1, 0, 0], 
-    [1, 0, 0],
-    [1, 0, 0]
-]) 
-lowercase_i3 = np.array([ 
-    [0, 0, 1], 
-    [0, 0, 1],
-    [0, 0, 1]
-]) 
-
-lowercase_l = np.array([ 
-    [1, 0, 0], 
-    [1, 0, 0],
-    [1, 1, 0]
-]) 
-lowercase_l2 = np.array([ 
-    [1, 0, 0], 
-    [1, 0, 0],
-    [1, 1, 0]
-]) 
-flattened_i = lowercase_i.flatten().tolist()
-flattened_i2 = lowercase_i2.flatten().tolist()
-flattened_i3 = lowercase_i3.flatten().tolist()
-lowercase_is = [flattened_i, flattened_i2, flattened_i3]
-
-uppercase_L = np.array([                              
-    [1, 0, 0],
-    [1, 0, 0],
-    [1, 1, 1]
-])
-uppercase_I = np.array([                             
-    [1, 1, 1],
-    [0, 1, 0],
-    [1, 1, 1]
-])
-
-flattened_l = lowercase_l.flatten().tolist()
-flattened_l2 = lowercase_l2.flatten().tolist()
-lowercase_ls = [flattened_l, flattened_l2]
-
-all_Ls = lowercase_ls + [uppercase_L.flatten().tolist()]
-all_Is = lowercase_is + [uppercase_I.flatten().tolist()]
-all_vectors = all_Ls + all_Is
-
-all_targets = [-1] * len(all_Ls) + [1] * len(all_Is)
-
-#now, we test the perceptron: 
-p = Perceptron(input_size=9, learning_rate=1)
-p.train(all_vectors, all_targets)
-p.evaluate(all_vectors, all_targets)
-
-# holy shit it worked. now we will test the generalization of these character shapes across a 5x5 matrix----------------------------------------------------------------------------
-
-
-
